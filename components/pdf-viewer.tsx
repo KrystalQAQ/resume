@@ -185,13 +185,9 @@ const renderIcon = ({ icon, size, style }: IconType) => {
 };
 
 // 渲染个人信息项
-const renderPersonalInfoItem = (item: any, showLabels: boolean, isInline: boolean, itemsPerRow?: number) => {
-  const itemStyle = isInline
-    ? styles.personalInfoInlineItem
-    : getPersonalInfoItemStyle(itemsPerRow);
-  
+const renderPersonalInfoItem = (item: any, showLabels: boolean, isInline: boolean) => {
   return (
-    <View key={item.id} style={itemStyle}>
+    <View key={item.id} style={{ flexDirection: "row", alignItems: "center" }}>
       {renderIcon({
         icon: item.icon,
         size: 12,
@@ -207,27 +203,108 @@ const renderPersonalInfoItem = (item: any, showLabels: boolean, isInline: boolea
   );
 };
 
-// 动态生成个人信息的网格样式
-const getPersonalInfoGridStyle = (itemsPerRow?: number) => {
-  const items = itemsPerRow || 2;
-  const itemWidth = `${100 / items}%`;
-  return {
-    flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
-    width: "100%",
-  };
-};
+// 将富文本JSON内容渲染为带样式的React-PDF组件
+const renderRichText = (content: any): React.ReactNode => {
+  if (!content) return null;
 
-// 动态生成个人信息项的样式
-const getPersonalInfoItemStyle = (itemsPerRow?: number) => {
-  const items = itemsPerRow || 2;
-  const itemWidth = `${100 / items}%`;
-  return {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    width: itemWidth,
-    marginBottom: 5,
+  const renderNode = (node: any, index: number): React.ReactNode => {
+    // 处理文本节点
+    if (node.text !== undefined) {
+      // 收集所有样式
+      const textStyles: any = {
+        fontSize: 10,
+      };
+
+      // 处理marks（粗体、斜体、下划线、颜色等）
+      if (node.marks && Array.isArray(node.marks)) {
+        node.marks.forEach((mark: any) => {
+          switch (mark.type) {
+            case 'bold':
+              textStyles.fontWeight = 'bold';
+              break;
+            case 'italic':
+              textStyles.fontStyle = 'italic';
+              break;
+            case 'underline':
+              textStyles.textDecoration = 'underline';
+              break;
+            case 'strike':
+              textStyles.textDecoration = 'line-through';
+              break;
+            case 'textStyle':
+              // 处理颜色
+              if (mark.attrs?.color) {
+                textStyles.color = mark.attrs.color;
+              }
+              // 处理字号
+              if (mark.attrs?.fontSize) {
+                const fontSize = mark.attrs.fontSize;
+                // 提取数字部分
+                const match = fontSize.match(/(\d+)/);
+                if (match) {
+                  textStyles.fontSize = parseInt(match[1], 10);
+                }
+              }
+              break;
+          }
+        });
+      }
+
+      return (
+        <Text key={index} style={textStyles}>
+          {node.text}
+        </Text>
+      );
+    }
+
+    // 处理段落节点
+    if (node.type === 'paragraph') {
+      const paragraphStyles: any = {
+        marginBottom: 3,
+      };
+
+      // 处理文本对齐
+      if (node.attrs?.textAlign) {
+        paragraphStyles.textAlign = node.attrs.textAlign;
+      }
+
+      return (
+        <View key={index} style={paragraphStyles}>
+          {node.content && Array.isArray(node.content) ? (
+            <Text style={styles.content}>
+              {node.content.map((child: any, childIndex: number) =>
+                renderNode(child, childIndex)
+              )}
+            </Text>
+          ) : (
+            <Text style={styles.content}> </Text>
+          )}
+        </View>
+      );
+    }
+
+    // 处理文档节点
+    if (node.type === 'doc' && node.content && Array.isArray(node.content)) {
+      return (
+        <View key={index}>
+          {node.content.map((child: any, childIndex: number) =>
+            renderNode(child, childIndex)
+          )}
+        </View>
+      );
+    }
+
+    // 处理其他节点类型
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map((child: any, childIndex: number) =>
+        renderNode(child, childIndex)
+      );
+    }
+
+    return null;
   };
+
+  return renderNode(content, 0);
 };
 
 // 简历PDF文档组件
@@ -240,11 +317,6 @@ const ResumePDF = ({ resumeData }: { resumeData: ResumeData }) => {
   const showLabels = personalInfoSection?.showPersonalInfoLabels !== false;
   const personalInfoItems = personalInfoSection?.personalInfo || [];
 
-  // 动态生成容器样式
-  const containerStyle = isInline
-    ? styles.personalInfoInline
-    : getPersonalInfoGridStyle(itemsPerRow);
-
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -254,26 +326,35 @@ const ResumePDF = ({ resumeData }: { resumeData: ResumeData }) => {
             <Text style={styles.title}>{resumeData.title || "简历标题"}</Text>
 
             {/* 个人信息 */}
-            <View style={containerStyle}>
-              {isInline ? (
-                // 单行显示模式
-                <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
-                  {personalInfoItems.map((item, index) => (
-                    <View key={item.id} style={{ flexDirection: "row", alignItems: "center" }}>
-                      {renderPersonalInfoItem(item, showLabels, true, 1)}
-                      {index < personalInfoItems.length - 1 && (
-                        <Text style={styles.personalInfoSeparator}> • </Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              ) : (
-                // 多行显示模式 - 使用动态itemsPerRow
-                <View style={getPersonalInfoGridStyle(itemsPerRow)}>
-                  {personalInfoItems.map((item) => renderPersonalInfoItem(item, showLabels, false, itemsPerRow))}
-                </View>
-              )}
-            </View>
+            {isInline ? (
+              // 单行显示模式
+              <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
+                {personalInfoItems.map((item, index) => (
+                  <View key={item.id} style={{ flexDirection: "row", alignItems: "center" }}>
+                    {renderPersonalInfoItem(item, showLabels, true)}
+                    {index < personalInfoItems.length - 1 && (
+                      <Text style={styles.personalInfoSeparator}> • </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            ) : (
+              // 多行显示模式 - 使用动态itemsPerRow
+              <View style={{ flexDirection: "row", flexWrap: "wrap", width: "100%" }}>
+                {personalInfoItems.map((item) => (
+                  <View
+                    key={item.id}
+                    style={{
+                      width: `${100 / itemsPerRow}%`,
+                      marginBottom: 5,
+                      paddingRight: 10
+                    }}
+                  >
+                    {renderPersonalInfoItem(item, showLabels, false)}
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
 
           {/* 头像 */}
@@ -293,22 +374,31 @@ const ResumePDF = ({ resumeData }: { resumeData: ResumeData }) => {
               </View>
 
               <View>
-                {/* 副标题和时间 */}
-                {(module.subtitle || module.timeRange) && (
-                  <View style={styles.moduleHeader}>
-                    {module.subtitle && (
-                      <Text style={styles.subtitle}>{module.subtitle}</Text>
-                    )}
-                    {module.timeRange && (
-                      <Text style={styles.timeRange}>{module.timeRange}</Text>
-                    )}
-                  </View>
-                )}
-
-                {/* 内容 */}
-                {module.content && (
-                  <Text style={styles.content}>{module.content}</Text>
-                )}
+                {/* 渲染行 */}
+                {module.rows
+                  .sort((a, b) => a.order - b.order)
+                  .map((row) => (
+                    <View
+                      key={row.id}
+                      style={{
+                        flexDirection: "row",
+                        marginBottom: 5,
+                        gap: 10
+                      }}
+                    >
+                      {row.elements.map((element) => (
+                        <View
+                          key={element.id}
+                          style={{
+                            flex: 1,
+                            minWidth: 0
+                          }}
+                        >
+                          {renderRichText(element.content)}
+                        </View>
+                      ))}
+                    </View>
+                  ))}
               </View>
             </View>
           ))}
