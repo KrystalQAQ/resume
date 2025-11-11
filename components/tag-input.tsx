@@ -18,7 +18,10 @@ export default function TagInput({ value, onChange, placeholder = "输入标签�
   const addTag = (raw: string) => {
     const tag = raw.trim()
     if (!tag) return
-    if (value.includes(tag)) return
+    if (value.includes(tag)) {
+      setError('标签已存在')
+      return
+    }
     if (value.length >= maxTags) {
       setError(`最多 ${maxTags} 个标签`)
       return
