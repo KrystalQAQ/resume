@@ -174,9 +174,26 @@ export interface ResumeData {
 
 项目使用Tailwind CSS进行样式管理，可以通过修改`tailwind.config.js`文件自定义主题颜色和其他样式。
 
+
+## 访问密码保护
+
+如果你希望对页面访问进行简单的密码保护，可设置环境变量 `SITE_PASSWORD`。当该变量存在且不为空时：
+- 用户访问任意页面会先被重定向到 `/auth` 输入密码；
+- 验证通过后，服务端会在浏览器写入一个有效期 30 天的 Cookie，后续访问无需再输入；
+- 若未配置 `SITE_PASSWORD`，则不启用认证，正常访问。
+
+使用方法：
+- 在项目根目录新增或编辑 `.env.local` 文件，加入：
+
+```
+SITE_PASSWORD=你的访问密码
+```
+
+说明：
+- 我们不会在 Cookie 中保存明文密码，而是保存其 SHA-256 摘要；
+- 中间件只对页面路由生效，不拦截 `/_next/*`、`/favicon.ico`、`/robots.txt` 以及认证相关路径 `/auth`、`/api/auth`；
+- 如需关闭认证，删除或清空 `SITE_PASSWORD` 即可。
+
 ## 许可证
 
 MIT
-
-
-
