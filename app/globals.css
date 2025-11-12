@@ -224,6 +224,23 @@
     background: #fff !important;
   }
 
+  /* Typography fallbacks: keep spacing consistent in headless Chromium */
+  body {
+    /* unify font with app's local font to avoid metric drift */
+    font-family: var(--font-noto-sans), system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif !important;
+    line-height: 1.55 !important;
+    font-size: 11pt !important;
+    color: #000 !important;
+  }
+  .resume-content .ProseMirror > p { 
+    margin: 0 0 5pt 0 !important; 
+    line-height: 1.6 !important; 
+  }
+  .resume-content .ProseMirror li { 
+    margin-bottom: 5pt !important; 
+    line-height: 1.6 !important; 
+  }
+
   @page { size: A4; margin: 1cm; }
 }
 
@@ -251,6 +268,20 @@
 
   .resume-preview {
     @apply w-3xl mx-auto bg-white shadow-lg p-8;
+  }
+
+  /* Screen preview (editor right pane) – ensure comfortable spacing in prod */
+  .resume-preview.resume-content {
+    line-height: 1.55;            /* base line height for the card */
+    font-size: 11pt;              /* keep consistent with PDF preview */
+  }
+  .resume-preview.resume-content .ProseMirror > p {
+    margin: 0 0 0.6em 0 !important;
+    line-height: 1.6 !important;
+  }
+  .resume-preview.resume-content li {
+    margin-bottom: 0.6em !important;
+    line-height: 1.6 !important;
   }
 
   .pdf-preview-container {
@@ -293,6 +324,20 @@
   /* 拉丁/数字优先的无衬线字体，cap-height 更高，和 SVG 图标更匹配 */
   .font-latin {
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+
+  /* PDF preview (browser view) – match on-screen spacing with local dev */
+  .pdf-preview-mode .resume-content {
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+  .pdf-preview-mode .resume-content .ProseMirror > p {
+    margin: 0 0 0.6em 0 !important;
+    line-height: 1.6 !important;
+  }
+  .pdf-preview-mode .resume-content .ProseMirror li {
+    margin-bottom: 0.6em !important;
+    line-height: 1.6 !important;
   }
 }
 

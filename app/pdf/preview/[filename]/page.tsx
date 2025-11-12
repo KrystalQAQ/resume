@@ -50,6 +50,27 @@ function PDFPreviewContent() {
     return () => window.removeEventListener('message', handleMessage);
   }, [])
 
+  // 当处于回退（浏览器打印）模式时，拦截 Ctrl/Cmd+P，跳转到纯净打印页，
+  // 该页面会等待字体就绪后再自动触发打印，避免行距因替换字体而变化。
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+        if (fallback) {
+          e.preventDefault();
+          try {
+            const url = new URL('/print', window.location.origin);
+            url.searchParams.set('auto', '1');
+            window.open(url.toString(), '_blank', 'noopener,noreferrer');
+          } catch {
+            try { window.location.href = '/print?auto=1'; } catch { }
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fallback]);
+
   if (!resumeData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
