@@ -99,7 +99,7 @@ pnpm build
 │  └── tiptap.css                       # 富文本编辑器样式
 ├── public/
 │  ├── NotoSansSC-Medium.ttf            # 字体（预览/打印共用）
-│  ├── template.re                       # 示例简历数据
+│  ├── template.json                       # 示例简历数据
 │  └── …
 └── types/
    └── resume.ts
@@ -168,7 +168,7 @@ export interface ResumeData {
 
 ### 数据导入导出
 
-支持将简历数据导出为`.re`文件，也可以从文件导入数据（`JSON`格式）。
+支持将简历数据导出为`.json`文件，也可以从文件导入数据。
 
 ## 自定义主题
 

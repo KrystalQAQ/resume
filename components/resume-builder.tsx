@@ -77,7 +77,7 @@ export default function ResumeBuilder() {
   useEffect(() => {
     const loadDemoData = async () => {
       try {
-        const response = await fetch("/template.re")
+        const response = await fetch("/template.json")
         if (!response.ok) {
           console.warn("模板文件不存在，使用默认数据")
           return
@@ -115,7 +115,7 @@ export default function ResumeBuilder() {
   const handleSave = () => {
     try {
       const fileContent = exportToMagicyanFile(editorState.resumeData)
-      const filename = `${editorState.resumeData.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")}.re`
+      const filename = `${editorState.resumeData.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "_")}.json`
       downloadFile(fileContent, filename)
 
       toast({
@@ -136,10 +136,10 @@ export default function ResumeBuilder() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!file.name.endsWith(".re")) {
+    if (!file.name.endsWith(".json")) {
       toast({
         title: "文件格式错误",
-        description: "请选择 .re 格式的文件",
+        description: "请选择 .json 格式的文件",
         variant: "destructive",
       })
       event.target.value = ""
@@ -214,7 +214,7 @@ export default function ResumeBuilder() {
 
           <Separator orientation="vertical" className="h-6" />
 
-          <input type="file" accept=".re" onChange={handleImport} className="hidden" id="import-file" />
+          <input type="file" accept=".json" onChange={handleImport} className="hidden" id="import-file" />
           <Button
             variant="outline"
             size="sm"
