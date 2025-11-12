@@ -240,10 +240,19 @@ export function PDFViewer({
             )}
             <span className="ml-2 text-foreground">请在打印对话框中：关闭“页眉和页脚”，勾选“背景图形”。</span>
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                try {
+                  const url = new URL('/print', window.location.origin);
+                  url.searchParams.set('auto', '1');
+                  window.open(url.toString(), '_blank', 'noopener,noreferrer');
+                } catch {
+                  // fallback to same-tab navigation
+                  try { window.location.href = '/print?auto=1'; } catch { }
+                }
+              }}
               className="ml-3 inline-flex items-center px-3 py-1.5 rounded bg-primary text-primary-foreground text-sm"
             >
-              打印/保存为 PDF
+              打开纯净打印页
             </button>
           </div>
         </div>

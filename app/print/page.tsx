@@ -17,15 +17,17 @@ function decodeDataParam(data?: string): ResumeData | null {
 export default async function PrintPage({
   searchParams,
 }: {
-  searchParams: Promise<{ data?: string }> | { data?: string };
+  searchParams: Promise<{ data?: string; auto?: string }> | { data?: string; auto?: string };
 }) {
   const awaited = await Promise.resolve(
-    searchParams as { data?: string } | Promise<{ data?: string }>
+    searchParams as { data?: string; auto?: string } | Promise<{ data?: string; auto?: string }>
   );
   const resumeData = decodeDataParam(awaited.data);
+  const auto = String(awaited.auto ?? '').toLowerCase();
+  const autoPrint = auto === '1' || auto === 'true' || auto === 'yes';
 
   // 兼容两种方式：
   // 1) 通过 URL `?data=` 传参（小数据量）
   // 2) 通过 sessionStorage 注入数据（大数据量，避免 431/414）
-  return <PrintContent initialData={resumeData} />;
+  return <PrintContent initialData={resumeData} autoPrint={autoPrint} />;
 }

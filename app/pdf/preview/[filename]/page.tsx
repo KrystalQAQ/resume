@@ -61,7 +61,7 @@ function PDFPreviewContent() {
   return (
     <div className="pdf-preview-page-root flex flex-col h-screen overflow-hidden print:h-auto print:overflow-visible">
       {fallback && (
-        <div className="flex items-center justify-between p-4 border-b no-print">
+        <div className="flex items-center justify-between p-4 border-b no-print print:hidden">
           <div className="flex items-baseline gap-3">
             <h1 className="text-xl font-bold">PDF预览</h1>
             <div className="flex items-baseline gap-1 text-xs text-muted-foreground">

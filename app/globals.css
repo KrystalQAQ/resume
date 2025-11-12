@@ -184,10 +184,47 @@
     margin: 0 !important;
   }
 
-  .ProseMirror li p {
-    display: inline !important;
-    margin: 0 !important;
+  .ProseMirror li p { 
+    display: inline !important; 
+    margin: 0 !important; 
   }
+}
+
+/* Robust print fallbacks live in global CSS to guarantee inclusion in prod */
+@media print {
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  /* Never print chrome/headers/toolbars */
+  .no-print { display: none !important; }
+
+  /* Remove fixed heights/scrolls from preview containers */
+  .pdf-preview-page-root,
+  .pdf-preview-page-root .h-screen,
+  .pdf-preview-page-root .min-h-screen,
+  .pdf-preview-page-root .overflow-hidden,
+  .pdf-preview-page-root .flex-1,
+  .pdf-fallback-container,
+  .pdf-fallback-container .pdf-preview-mode {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ensure the resume page prints clean */
+  .pdf-preview-mode .resume-content {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+  }
+
+  @page { size: A4; margin: 1cm; }
 }
 
 /* 添加简历编辑器专用样式 */
