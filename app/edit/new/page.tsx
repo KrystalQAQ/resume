@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import ResumeBuilder from "@/components/resume-builder"
 import type { ResumeData } from "@/types/resume"
@@ -9,6 +9,14 @@ import { createEntryFromData, loadDefaultTemplate, StorageError, getResumeById }
 import { useToast } from "@/hooks/use-toast"
 
 export default function NewEditPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-background p-6 text-muted-foreground">加载中...</main>}>
+      <NewEditPageContent />
+    </Suspense>
+  )
+}
+
+function NewEditPageContent() {
   const router = useRouter()
   const search = useSearchParams()
   const { toast } = useToast()
