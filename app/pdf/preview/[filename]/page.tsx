@@ -13,17 +13,8 @@ const DynamicPDFViewer = dynamic(
 )
 
 function PDFPreviewContent() {
-  // IMPORTANT: Avoid reading sessionStorage during initial render to prevent
-  // server/client markup mismatch. Initialize to null and hydrate after mount.
-  const [resumeData, setResumeData] = useState<ResumeData | null>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const cached = sessionStorage.getItem('resumeData');
-        if (cached) return JSON.parse(cached);
-      } catch { }
-    }
-    return null;
-  })
+  // 在首屏渲染时保持为 null，避免因读取 sessionStorage 导致 SSR/CSR 标记不一致
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null)
   const [fallback, setFallback] = useState(false)
   // derive from location to avoid setState in effect
   const serverFilename = typeof window !== 'undefined'
@@ -32,6 +23,19 @@ function PDFPreviewContent() {
 
   // Wire postMessage handshake once
   useEffect(() => {
+    // 1) 首次挂载后再从 sessionStorage 恢复数据，确保与服务器标记一致
+    try {
+      const cached = sessionStorage.getItem('resumeData')
+      if (cached) {
+        const parsed: ResumeData = JSON.parse(cached)
+        if (typeof queueMicrotask === 'function') {
+          queueMicrotask(() => setResumeData(parsed))
+        } else {
+          setTimeout(() => setResumeData(parsed), 0)
+        }
+      }
+    } catch { }
+
     const handleMessage = (event: MessageEvent) => {
       const payload = (event as unknown as { data?: { type?: string; data?: ResumeData } }).data;
       if (payload?.type === 'resumeData' && payload.data) {
