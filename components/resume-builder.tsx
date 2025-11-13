@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Icon } from "@iconify/react"
 import type { ResumeData, EditorState } from "@/types/resume"
 import { createDefaultResumeData } from "@/lib/utils"
-import { loadDefaultTemplate } from "@/lib/storage"
+import { loadDefaultTemplate, loadExampleTemplate } from "@/lib/storage"
 import ResumePreview from "./resume-preview"
 import PersonalInfoEditor from "./personal-info-editor"
 import JobIntentionEditor from "./job-intention-editor"
@@ -63,7 +63,7 @@ ViewModeSelector.displayName = "ViewModeSelector"
 /**
  * 简历构建器主组件
  */
-export default function ResumeBuilder({ initialData, onChange, onSave, onBack }: { initialData?: ResumeData; onChange?: (data: ResumeData) => void; onSave?: (data: ResumeData) => void; onBack?: () => void }) {
+export default function ResumeBuilder({ initialData, template = "default", onChange, onSave, onBack }: { initialData?: ResumeData; template?: "default" | "example"; onChange?: (data: ResumeData) => void; onSave?: (data: ResumeData) => void; onBack?: () => void }) {
   const [editorState, setEditorState] = useState<EditorState>({
     resumeData: initialData ?? createDefaultResumeData(),
     isEditing: true,
@@ -74,17 +74,16 @@ export default function ResumeBuilder({ initialData, onChange, onSave, onBack }:
 
   useEffect(() => {
     if (initialData) return
-    const loadDemoData = async () => {
-      const demoData = await loadDefaultTemplate()
-      if (!demoData) return
+    const loadTemplate = async () => {
+      const tpl = template === "example" ? await loadExampleTemplate() : await loadDefaultTemplate()
+      if (!tpl) return
       setEditorState((prev) => ({
         ...prev,
-        resumeData: demoData,
+        resumeData: tpl,
       }))
     }
-
-    loadDemoData()
-  }, [initialData])
+    loadTemplate()
+  }, [initialData, template])
 
   const handleViewModeChange = useCallback((mode: ViewMode) => {
     setViewMode(mode)

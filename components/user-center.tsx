@@ -12,7 +12,7 @@ import { Icon } from "@iconify/react"
 import { useToast } from "@/hooks/use-toast"
 import type { StoredResume } from "@/types/resume"
 import { importFromMagicyanFile } from "@/lib/utils"
-import { StorageError, createEntryFromData, deleteResumes, getAllResumes } from "@/lib/storage"
+import { StorageError, createEntryFromData, deleteResumes, getAllResumes, loadDefaultTemplate, loadExampleTemplate } from "@/lib/storage"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import ExportButton from "@/components/export-button"
 
@@ -42,6 +42,13 @@ export default function UserCenter() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  // 轻量预取新建/示例模板，提升后续进入编辑页的首屏速度
+  useEffect(() => {
+    // 忽略结果，仅触发浏览器缓存
+    loadDefaultTemplate()
+    loadExampleTemplate()
+  }, [])
 
   const filteredSorted = useMemo(() => {
     const list = items.filter((it) =>

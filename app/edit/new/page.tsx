@@ -1,19 +1,14 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import ResumeBuilder from "@/components/resume-builder"
 import type { ResumeData } from "@/types/resume"
-import { createDefaultResumeData } from "@/lib/utils"
-import { createEntryFromData, loadDefaultTemplate, loadExampleTemplate, StorageError, getResumeById } from "@/lib/storage"
+import { createEntryFromData, StorageError, getResumeById } from "@/lib/storage"
 import { useToast } from "@/hooks/use-toast"
 
 export default function NewEditPage() {
-  return (
-    <Suspense fallback={<main className="min-h-screen bg-background p-6 text-muted-foreground">加载中...</main>}>
-      <NewEditPageContent />
-    </Suspense>
-  )
+  return <NewEditPageContent />
 }
 
 function NewEditPageContent() {
@@ -21,34 +16,15 @@ function NewEditPageContent() {
   const search = useSearchParams()
   const { toast } = useToast()
 
-  const [data, setData] = useState<ResumeData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const cloneId = search.get("clone")
+  const useExample = search.get("example") === "1" || search.get("example") === "true"
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        // If clone id provided, prefill with that resume's data (without saving)
-        const cloneId = search.get("clone")
-        if (cloneId) {
-          const entry = getResumeById(cloneId)
-          if (entry) {
-            setData({ ...entry.resumeData })
-            setLoading(false)
-            return
-          }
-        }
-        // Otherwise try template (allow example override via query)
-        const useExample = search.get("example") === "1" || search.get("example") === "true"
-        const tpl = useExample ? await loadExampleTemplate() : await loadDefaultTemplate()
-        const base = tpl ?? createDefaultResumeData()
-        if (!base.avatar) base.avatar = "/default-avatar.jpg"
-        setData(base)
-      } finally {
-        setLoading(false)
-      }
-    }
-    init()
-  }, [search])
+  // Clone data can be read synchronously from localStorage
+  const clonedData: ResumeData | undefined = useMemo(() => {
+    if (!cloneId) return undefined
+    const entry = getResumeById(cloneId)
+    return entry ? { ...entry.resumeData } : undefined
+  }, [cloneId])
 
   const handleSave = async (current: ResumeData) => {
     try {
@@ -69,15 +45,12 @@ function NewEditPageContent() {
     }
   }
 
-  if (loading || !data) {
-    return <main className="min-h-screen bg-background p-6 text-muted-foreground">加载中...</main>
-  }
-
   return (
     <main className="min-h-screen bg-background">
       <ResumeBuilder
-        initialData={data}
-        onChange={setData}
+        // 如果是克隆则直接使用克隆数据；否则让构建器自己加载模板并即时显示默认表单
+        initialData={clonedData}
+        template={useExample ? "example" : "default"}
         onBack={() => router.push("/")}
         onSave={(d) => handleSave(d)}
       />
