@@ -215,6 +215,19 @@ SITE_PASSWORD=你的访问密码
 - 中间件只对页面路由生效，不拦截 `/_next/*`、`/favicon.ico`、`/robots.txt` 以及认证相关路径 `/auth`、`/api/auth`；
 - 如需关闭认证，删除或清空 `SITE_PASSWORD` 即可。
 
+## TODO
+
+### 集成 AI 服务
+- [ ] 允许用户自定义服务提供商和模型，支持 OpenAI、Anthropic、Gemini等接口类型
+- [ ] 结合 Job Description 自动编写、润色、优化、纠错简历
+- [ ] 基于简历给出面试准备建议
+- [ ] 模拟面试
+- [ ] 利用 AI Agent 从网络自动抓取并汇总相似岗位的面经并展示
+
+### 支持加密远程存储
+- [ ] 集成 WebDAV、Google Cloud、OneDrive 等用于数据存储与同步
+- [ ] 用户自定义加密密码
+
 ## 许可证
 
 MIT

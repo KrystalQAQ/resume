@@ -124,7 +124,7 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
                     />
                   )}
                   {resumeData.personalInfoSection?.showPersonalInfoLabels !== false && (
-                    <span className="text-sm leading-none text-muted-foreground shrink-0">{item.label}:</span>
+                    <span className="text-sm leading-none text-muted-foreground shrink-0">{item.label}：</span>
                   )}
                   {item.value.type === "link" && item.value.content ? (
                     <a
@@ -147,8 +147,6 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
               const itemsPerRow = resumeData.personalInfoSection?.layout?.itemsPerRow || 2;
               const rowGapRem = 0.5; // 行间距
               const personalInfo = resumeData.personalInfoSection?.personalInfo || [];
-              // 为防止某一列极长导致整体溢出，按列数设置上限宽度（ch 单位）
-
 
               return (
                 <div
@@ -178,7 +176,7 @@ export default function ResumePreview({ resumeData }: ResumePreviewProps) {
                         />
                       )}
                       {resumeData.personalInfoSection?.showPersonalInfoLabels !== false && (
-                        <span className="text-sm leading-none text-muted-foreground flex-shrink-0">{item.label}:</span>
+                        <span className="text-sm leading-none text-muted-foreground flex-shrink-0">{item.label}：</span>
                       )}
                       {item.value.type === "link" && item.value.content ? (
                         <a

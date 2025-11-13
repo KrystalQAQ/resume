@@ -106,12 +106,6 @@ export default function ResumeBuilder({ initialData, onChange, onSave, onBack }:
     onChange?.(editorState.resumeData)
   }, [editorState.resumeData, onChange])
 
-
-
-  // 导入功能已移至用户中心
-
-  // PDF 导出功能现在由 PDFExportButton 组件处理
-
   return (
     <div className="resume-editor">
       {/* 工具栏 */}
